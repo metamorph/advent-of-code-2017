@@ -17,10 +17,15 @@
   ([ns] (captcha-2 1 ns))
   ([dist ns]
    (as-> ns $
+     ;; Rotate the list `dist` number of elements and get a list with the same length as `ns`.
      (take (count $) (drop dist (cycle $)))
+     ;; Join that list with the original (creates a list of pairs).
      (map vector ns $)
+     ;; Select all pairs where both elements are the same.
      (filter #(= (first %1) (last %1)) $)
+     ;; Select the first element of each pair (from the `ns` list)
      (map first $)
+     ;; Calculate the sum of all of those values.
      (reduce + 0 $))))
 
 (defn read-input

@@ -6,10 +6,18 @@
   `dist` is the distance between two numbers to check for equality."
   ([ns] (captcha 1 ns))
   ([dist ns]
-   (let [partitions (->> (cycle ns)
-                         (take (+ dist (count ns)))
-                         (partition (inc dist) 1))
+   (let [partitions (->>
+                     ;; With an infinite sequence
+                     (cycle ns)
+                     ;; Take the original elements + the extra introduced by the added distance.
+                     ;; We now have a list if `ns + dist` length.
+                     (take (+ dist (count ns)))
+                     ;; Partition the list in chunks of `dist` with a step of `1`.
+                     (partition (inc dist) 1))
+         ;; Find the partitions where the first and last element equals.
+         ;; Then collect the first element from every matching partition.
          matches    (map first (filter #(= (first %1) (last %1)) partitions))]
+     ;; Calculate the sum.
      (reduce + 0 matches))))
 
 (defn captcha-2

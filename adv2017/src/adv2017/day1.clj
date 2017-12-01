@@ -12,6 +12,17 @@
          matches    (map first (filter #(= (first %1) (last %1)) partitions))]
      (reduce + 0 matches))))
 
+(defn captcha-2
+  "Another version where we joins two lists instead of using `partition`."
+  ([ns] (captcha-2 1 ns))
+  ([dist ns]
+   (as-> ns $
+     (take (count $) (drop dist (cycle $)))
+     (map vector ns $)
+     (filter #(= (first %1) (last %1)) $)
+     (map first $)
+     (reduce + 0 $))))
+
 (defn read-input
   "Read the data."
   []

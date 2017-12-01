@@ -12,17 +12,19 @@
          matches    (map first (filter #(= (first %1) (last %1)) partitions))]
      (reduce + 0 matches))))
 
-(defn captcha-for-input-1 []
+(defn read-input
+  "Read the data."
+  []
   (->> (slurp (io/resource "day1-input.txt"))
        (clojure.string/trim)
        (seq)
-       (map #(Integer/parseInt (str %)))
-       (captcha)))
+       (map #(Integer/parseInt (str %)))))
+
+(defn captcha-for-input-1 []
+  (let [input (read-input)]
+    (captcha input)))
 
 (defn captcha-for-input-2 []
-  (let [ns (->> (slurp (io/resource "day1-input.txt"))
-                (clojure.string/trim)
-                (seq)
-                (map #(Integer/parseInt (str %))))]
-    (captcha (quot (count ns) 2) ns)))
+  (let [input (read-input)]
+    (captcha (quot (count input) 2) input)))
 

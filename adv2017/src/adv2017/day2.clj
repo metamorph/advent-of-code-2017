@@ -1,6 +1,5 @@
 (ns adv2017.day2
   (:require [clojure.java.io :as io]
-            [clojure.math.combinatorics :refer [combinations]]
             [clojure.string :as str]))
 
 (defn read-sheet
@@ -11,21 +10,36 @@
        (line-seq)
        (map (fn [l] (map #(Integer/parseInt %) (str/split l #"\t"))))))
 
-(defn minmax-checksum
+(defn minmax-checksum-slow
   "Slow implementation"
   [xs] (Math/abs (- (apply min xs) (apply max xs))))
 
+(defn minmax-checksum
+  [xs]
+  (let [[min max] (reduce
+                   (fn [[min max] n]
+                     [(if (< n min) n min)
+                      (if (> n max) n max)])
+                   [Integer/MAX_VALUE Integer/MIN_VALUE] xs)]
+    (- max min)))
+
+(defn combinations [xs]
+  (if (seq xs)
+    (concat
+     (map vector (repeat (first xs)) (rest xs))
+     (combinations (rest xs)))
+    []))
+
 (defn evendiv-checksum [xs]
   (let [[a b] (first (filter
-                      (fn [[a b]] (and (not= a b)
-                                       (= 0 (rem (max a b) (min a b)))))
-                      (combinations xs 2)))]
+                      (fn [[a b]] (= 0 (rem (max a b) (min a b))))
+                      (combinations xs)))]
     (quot (max a b) (min a b))))
 
 (defn spreadsheet-checksum [sheet checksum-fn]
   (reduce + 0 (map checksum-fn sheet)))
 
 (defn checksum-1 []
-  (spreadsheet-checksum (read-sheet) minmax-checksum))
+  (time (spreadsheet-checksum (read-sheet) minmax-checksum)))
 (defn checksum-2 []
-  (spreadsheet-checksum (read-sheet) evendiv-checksum))
+  (time (spreadsheet-checksum (read-sheet) evendiv-checksum)))

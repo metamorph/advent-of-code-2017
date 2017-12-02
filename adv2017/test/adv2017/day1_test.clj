@@ -9,8 +9,8 @@
     (is (= 0 (captcha [1 2 3 4])))
     (is (= 9 (captcha [9 1 2 1 2 1 2 9]))))
   (testing "test-2"
-    (is (= 6 (captcha [1 2 1 2] 2 )))
-    (is (= 0 (captcha [1 2 2 1] 2)))
-    (is (= 4 (captcha [1 2 3 4 2 5] 3)))
-    (is (= 12 (captcha [1 2 3 1 2 3] 3)))
-    (is (= 4 (captcha [1 2 1 3 1 4 1 5] 4)))))
+    (is (= 6 (captcha 2 [1 2 1 2])))
+    (is (= 0 (captcha 2 [1 2 2 1])))
+    (is (= 4 (captcha 3 [1 2 3 4 2 5])))
+    (is (= 12 (captcha 3 [1 2 3 1 2 3])))
+    (is (= 4 (captcha 4 [1 2 1 3 1 4 1 5])))))

@@ -52,13 +52,13 @@
   calculate the new state with `xy` included."
   [state xy]
   (let [adjecent (neighbours xy)
-        value (reduce + 0 (map (fn [xy] (get state xy 0)) adjecent))]
+        value    (reduce + 0 (map (fn [xy] (get state xy 0)) adjecent))]
     (assoc state xy value)))
 
 (defn grid-values
   "Values in the crid (calculated by summing values from neighbours)"
   []
-  (let [coords (coordinates)
+  (let [coords      (coordinates)
         incr-states (reductions next-state
                                 {[0 0] 1}
                                 (drop 1 (coordinates)))]
@@ -68,7 +68,7 @@
   "Print the results."
   []
   (time
-   (let [input 277678
+   (let [input      277678
          solution-1 (square->dist input)
          solution-2 (first (drop-while #(< % input) (grid-values)))]
      (println "Distance for" input ":" solution-1)

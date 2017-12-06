@@ -24,9 +24,14 @@
 (defn solve-1 [input]
   (reduce (fn [acc col]
             (if (contains? acc col)
-              (reduced (count acc))
+              (reduced [(count acc) col])
               (conj acc col)))
           #{}
           (redistributions input)))
 
+(defn solve-2 [input]
+  (let [redists (redistributions input)
+        [idx v] (solve-1 input)
+        col (drop (inc idx) redists)]
+    (inc (count (take-while #(not= v %) col)))))
 

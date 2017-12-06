@@ -5,11 +5,11 @@
   it out (cycle) on top of other elements."
   [col]
   ;; Find the max-index
-  (let [indexed (map vector (iterate inc 0) col)
-        [start v] (apply max-key (cons last indexed))]
+  (let [maxv (apply max col)
+        start (.indexOf col maxv)]
     (loop [col (assoc col start 0)
            idx (inc start)
-           remaining v]
+           remaining maxv]
       (if (zero? remaining)
         col
         (recur (update col (mod idx (count col)) inc)
@@ -18,5 +18,15 @@
 
 (defn redistributions [init]
   (iterate redistribute init))
+
+(def input-1 [4 10 4 1 8 4 9 14 5 1 14 15 0 15 3 5])
+
+(defn solve-1 [input]
+  (reduce (fn [acc col]
+            (if (contains? acc col)
+              (reduced (count acc))
+              (conj acc col)))
+          #{}
+          (redistributions input)))
 
 

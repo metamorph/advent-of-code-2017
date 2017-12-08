@@ -51,10 +51,28 @@ cntj (57)"]
     (apply + w (map #(weight-for tree %) children))))
 
 (defn weights-from [tree node]
-  (let [{:keys [children]} (get tree node)
-        weights (map (fn [c] [c (weight-for tree c)])
-                     children)]
-    weights))
+  (let [{:keys [children]} (get tree node)]
+    (map (fn [c] [c (weight-for tree c)])
+         children)))
+
+(defn unbalanced-node [weights]
+  (let [by-weight (reduce (fn [m [n w]] (update m w conj n)) {} weights)]
+    (first (last (first (filter (fn [[w names]] (= 1 (count names)))
+                          by-weight))))))
+
+(defn unbalanced? [tree node]
+  (unbalanced-node (weights-from tree node)))
+
+(defn rebalance-node [tree]
+  (let [root (find-root tree)]
+    (loop [node root]
+      (let [weights (weights-from tree node)
+            unbalanced (unbalanced-node weights)]
+        (if unbalanced
+          (recur unbalanced)
+          node)))))
+
+
 
 
 

@@ -1,4 +1,6 @@
-(ns adv2017.day8)
+(ns adv2017.day8
+  (:require [clojure.java.io :as io]
+            [clojure.string :as s]))
 
 (def test-lines
   ["b inc 5 if a > 1"
@@ -6,11 +8,18 @@
    "c dec -10 if a >= 1"
    "c inc -20 if c == 10"])
 
+(defn input-lines
+  "Read input file as lines."
+  []
+  (->> (io/resource "day8-input.txt")
+       (slurp)
+       (s/split-lines)))
+
 (defn parse-instr
   "TODO: Maybe try antlr instead, just for fun."
   [l]
   (if-let [[_ reg op v pred-reg pred-op pred-v]
-           (re-find #"(\w+)\s+(\w+)\s+([-]*\d+)\s+if\s+(\w+)\s+(\W+)\s+(\d+)" l)]
+           (re-find #"(\w+)\s+(\w+)\s+([-]*\d+)\s+if\s+(\w+)\s+(\W+)\s+([-]*\d+)" l)]
     {:reg   reg
      :op    op
      :value (Integer/parseInt v)
@@ -41,15 +50,26 @@
       (let [v (get registry reg 0)]
         (assoc registry reg (f v value))))))
 
-(defn reducer-fn [registry instr]
+(defn reducer-fn
+  "Apply the `instr`(uction) to the registry, and return the new registry."
+  [registry instr]
   (let [pred-fn (make-pred (:pred instr))
         op-fn   (make-op instr)]
     (if (pred-fn registry)
       (op-fn registry)
       registry)))
 
-(defn apply-instr [instructions]
+(defn apply-instr
+  "Apply a list of instructions on an empty registry."
+  [instructions]
   (reduce reducer-fn {} instructions))
 
 (defn solve-1 [lines]
   (apply max (vals (apply-instr (map parse-instr lines)))))
+
+(defn solve-2 [lines]
+  (let [instructions (map parse-instr lines)
+        states       (reductions reducer-fn {} instructions)
+        max-values   (map #(apply max %) (filter some? (map vals states)))]
+    (apply max max-values)))
+

@@ -4,28 +4,28 @@
 (defn make-drop-!-xf
   "Returns a transducer that will drop any `!` and a
   following char." []
-  (let [drop-next? (atom false)]
+  (let [drop-next? (volatile! false)]
     (filter
      (fn [c] (if @drop-next?
-               (do (reset! drop-next? false)
+               (do (vreset! drop-next? false)
                    false)
                (if (= \! c)
                  (do
-                   (reset! drop-next? true)
+                   (vreset! drop-next? true)
                    false)
                  true))))))
 
 (defn make-drop-garbage-xf
   "Returns a transducer that will drop all garbage from a stream
   of chars." []
-  (let [drop-next? (atom false)]
+  (let [drop-next? (volatile! false)]
     (filter
      (fn [c]
        (cond
-         (= \< c) (do (reset! drop-next? true)
+         (= \< c) (do (vreset! drop-next? true)
                       false)
 
-         (= \> c) (do (reset! drop-next? false)
+         (= \> c) (do (vreset! drop-next? false)
                       false)
          :else    (not @drop-next?))))))
 

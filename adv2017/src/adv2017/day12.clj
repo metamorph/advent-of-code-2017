@@ -11,7 +11,9 @@
                  5 '(6)
                  6 '(4 5)})
 
-(defn reduce-line [m l]
+(defn reduce-line
+  "Add a line to `m`."
+  [m l]
   (if-let [[_ n refs] (re-find #"(\d+)\s+<->\s+(.*)" l)]
     (assoc m
            (Integer/parseInt n)
@@ -24,11 +26,24 @@
        (line-seq)
        (reduce reduce-line {})))
 
-
-
 (defn numbers-in-group
+  "Get the numbers in a group."
   ([seen state n]
    (let [xs (filter (complement seen) (get state n '()))]
-     (cons n (mapcat #(numbers-in-group (set (concat seen xs [n])) state %) xs)))
-   )
+     (cons n (mapcat #(numbers-in-group (set (concat seen xs [n])) state %) xs))))
   ([state n] (numbers-in-group #{} state n)))
+
+(defn groups
+  "Count the number of distinct groups."
+  [state]
+  (loop [group-count  0
+         state        state
+         [pid & tail] (keys state)]
+    (if pid
+      (let [group (numbers-in-group state pid)]
+        (recur (inc group-count)
+               state
+               (filter (complement (set group)) tail)))
+      ;; else
+      group-count)))
+

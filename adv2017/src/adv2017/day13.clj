@@ -24,11 +24,13 @@
 (defn at-pos?
   "Check if a sensor with range (`r`) is at the position
   `pos` at a given `time`."
-  [r pos time]
+  [time pos r]
   (zero? (rem (+ pos time) (cycle-length r))))
 
+(defn severity [l r] (* l r))
+
 (defn trip-severity [fw]
-  (let [hit-ranges (filter
-                    (fn [[l r]] (at-pos? r 0 l)) fw)]
-    (reduce (fn [acc [l r]] (+ acc (* l r))) 0 hit-ranges)))
+  (let [hit-ranges (filter #(apply at-pos? 0 %) fw)]
+    (reduce (fn [acc lr] (+ acc (apply severity lr)))
+            0 hit-ranges)))
 

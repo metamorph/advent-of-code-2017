@@ -1,5 +1,6 @@
 (ns adv2017.day14
   (:require [adv2017.day10 :as day10]
+            [clojure.set :as s]
             [clojure.string :as str]))
 
 (def puzzle-input "oundnydw")
@@ -32,10 +33,10 @@
     (reduce + 0 (map row->used rows))))
 
 (defn partition-succ
-  "Partitions a seq of numbers into groups.
+  "Partitions a seq of numbers into groups of consecutive numbers.
   (1 2 5 7 8 9) -> ((1 2) (5) (7 8 9))"
   [xs]
-  (apply conj
+  (apply conj ;; Dont forget to add the last group to the result
          (reduce (fn [[groups [p & _ :as current]] n]
                    (if p
                      (if (= (inc p) n)
@@ -43,3 +44,13 @@
                        [(conj groups current) (list n)])
                      [groups (cons n current)]))
                  [nil '()] xs)))
+
+(defn count-regions [rows]
+  (first (reduce
+          (fn [[group-count prev-regions] xs]
+            (let [regions (map set (partition-succ xs))]
+              ;; Add all `prev-regions` that do not overlap with `regions`
+              ;; to `group-count`.
+              )
+            )
+          [0 '()] rows)))

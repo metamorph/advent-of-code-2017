@@ -31,15 +31,15 @@
   (let [rows (grid-rows input)]
     (reduce + 0 (map row->used rows))))
 
-;; (defn row->indices [r]
-;;   (map first
-;;        (filter #(= (last %) \1)
-;;                (map vector (iterate inc 0) r))))
-
-;; (defn partition-consecutives
-;;   "Partitions a seq of numbers into groups.
-;;   (1 2 5 7 8 9) -> ((1 2) (5) (7 8 9))"
-;;   [xs]
-;;   (reduce
-;;    (fn [] )
-;;    xs))
+(defn partition-succ
+  "Partitions a seq of numbers into groups.
+  (1 2 5 7 8 9) -> ((1 2) (5) (7 8 9))"
+  [xs]
+  (apply conj
+         (reduce (fn [[groups [p & _ :as current]] n]
+                   (if p
+                     (if (= (inc p) n)
+                       [groups (cons n current)]
+                       [(conj groups current) (list n)])
+                     [groups (cons n current)]))
+                 [nil '()] xs)))

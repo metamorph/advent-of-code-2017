@@ -12,14 +12,33 @@
 
 (defn with-step2-iterations [cfg] (assoc cfg :iterations 5000000))
 
-(defn low-bits [x n]
-  (bit-and x (unchecked-dec (bit-shift-left 1 n))))
-
 (defn int->16bits [i]
-  (low-bits i 16))
+  (bit-and i 0xffff))
 
 (defn make-generator [seed factor]
   (drop 1 (iterate #(rem (* factor %) 2147483647) seed)))
+
+(defn make-generator-fn [factor]
+  (fn [v] (rem (* factor v) 2147483647)))
+
+(defn solve-1-1 [{:keys              [iterations]
+                  {seed-a   :seed
+                   factor-a :factor} :gen-a
+                  {seed-b   :seed
+                   factor-b :factor} :gen-b}]
+  (let [a-seq (make-generator-fn factor-a)
+        b-seq (make-generator-fn factor-b)]
+    (loop [result 0
+           its    0
+           a-value (a-seq seed-a)
+           b-value (b-seq seed-b)]
+
+      (if (= its iterations)
+        result
+        (if (= (int->16bits a-value)
+               (int->16bits b-value))
+          (recur (inc result) (inc its) (a-seq a-value) (b-seq b-value))
+          (recur result (inc its) (a-seq a-value) (b-seq b-value)))))))
 
 (defn solve-1 [{:keys [iterations]
                 {seed-a   :seed

@@ -8,17 +8,12 @@
     (into [] (concat tail head))))
 
 (defn exchange [xs a b]
-  (let [av (get xs a)
-        bv (get xs b)]
-    (-> (assoc xs b av)
-        (assoc a bv))))
+  (-> (assoc xs b (get xs a))
+      (assoc a (get xs b))))
 
 (defn partner [xs v1 v2]
-  (let [a (.indexOf xs v1)
-        b (.indexOf xs v2)]
-    (exchange xs a b)))
-(defn partner-1 [xs v1 v2]
-  (replace {v1 v2 v2 v1} xs))
+  (replace {v1 v2
+            v2 v1} xs))
 
 (defn token->fn [s]
   (condp re-find s
@@ -28,7 +23,7 @@
                                    b       (Integer/parseInt b)] (fn [xs] (exchange xs a b)))
     #"p([a-p])/([a-p])" :>> #(let [[_ a b] %
                                    a       (first a)
-                                   b       (first b)] (fn [xs] (partner-1 xs a b)))))
+                                   b       (first b)] (fn [xs] (partner xs a b)))))
 
 (defn input->tokens [input]
   (str/split input #","))
@@ -44,30 +39,34 @@
 (defn apply-dance [xs fns]
   (reduce (fn [xs f] (f xs)) xs fns))
 
-(defn mem-apply-dance []
-  (let [cached (atom {})]
-    (fn [a b]
-      (if-let [v (get @cached a)]
-        v
-        (let [v (apply-dance a b)]
-          (swap! cached assoc a v)
+(defn memoized-apply-dance []
+  (let [cache (atom {:called 0
+                     :cached {}})]
+    (fn [xs fns]
+      (swap! cache update :called inc)
+      (if-let [v (get-in @cache [:cached xs])]
+        (do (println "Found match in cache. Call:" (:called @cache))
+            v)
+        (let [v (apply-dance xs fns)]
+          (swap! cache assoc-in [:cached xs] (apply-dance xs fns))
           v)))))
 
 (defn solve-1 []
   (let [xs  (make-dance-line)
         fns (->> (read-input)
-                (input->tokens)
-                (map token->fn))]
+                 (input->tokens)
+                 (map token->fn))]
     (apply str (apply-dance xs fns))))
 
 (defn solve-2 [iterations]
-  (let [dance-fn (mem-apply-dance)](apply str
-          (loop [it  0
-                 xs  (make-dance-line)
-                 fns (->> (read-input) (input->tokens) (map token->fn))]
-            (if (= it iterations)
-              xs
-              (recur (inc it) (dance-fn xs fns) fns))))))
+  (let [dance-fn (memoized-apply-dance)]
+    (apply str
+           (loop [it  0
+                  xs  (make-dance-line)
+                  fns (->> (read-input) (input->tokens) (map token->fn))]
+             (if (= it iterations)
+               xs
+               (recur (inc it) (dance-fn xs fns) fns))))))
 
 (defn -main [& args]
-  (println (solve-2 1000)))
+  (println (solve-2 1000000000)))

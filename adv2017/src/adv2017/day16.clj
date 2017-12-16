@@ -17,6 +17,8 @@
   (let [a (.indexOf xs v1)
         b (.indexOf xs v2)]
     (exchange xs a b)))
+(defn partner-1 [xs v1 v2]
+  (replace {v1 v2 v2 v1} xs))
 
 (defn token->fn [s]
   (condp re-find s
@@ -26,7 +28,7 @@
                                    b       (Integer/parseInt b)] (fn [xs] (exchange xs a b)))
     #"p([a-p])/([a-p])" :>> #(let [[_ a b] %
                                    a       (first a)
-                                   b       (first b)] (fn [xs] (partner xs a b)))))
+                                   b       (first b)] (fn [xs] (partner-1 xs a b)))))
 
 (defn input->tokens [input]
   (str/split input #","))
@@ -42,6 +44,15 @@
 (defn apply-dance [xs fns]
   (reduce (fn [xs f] (f xs)) xs fns))
 
+(defn mem-apply-dance []
+  (let [cached (atom {})]
+    (fn [a b]
+      (if-let [v (get @cached a)]
+        v
+        (let [v (apply-dance a b)]
+          (swap! cached assoc a v)
+          v)))))
+
 (defn solve-1 []
   (let [xs  (make-dance-line)
         fns (->> (read-input)
@@ -50,13 +61,13 @@
     (apply str (apply-dance xs fns))))
 
 (defn solve-2 [iterations]
-  (apply str
-         (loop [it  0
-                xs  (make-dance-line)
-                fns (->> (read-input) (input->tokens) (map token->fn))]
-           (if (= it iterations)
-             xs
-             (recur (inc it) (apply-dance xs fns) fns)))))
+  (let [dance-fn (mem-apply-dance)](apply str
+          (loop [it  0
+                 xs  (make-dance-line)
+                 fns (->> (read-input) (input->tokens) (map token->fn))]
+            (if (= it iterations)
+              xs
+              (recur (inc it) (dance-fn xs fns) fns))))))
 
 (defn -main [& args]
   (println (solve-2 1000)))

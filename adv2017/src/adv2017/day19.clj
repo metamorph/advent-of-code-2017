@@ -2,8 +2,19 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
+(defn getv [{:keys [maze]} [x y]]
+  (get (get maze y) x))
+
+(defn find-start [maze]
+  (let [x (.indexOf (get maze 0) \|)]
+    [x 0]))
+
 (defn parse-input [lines]
-  (mapv vec lines))
+  (let [maze (mapv vec lines)]
+    {:letters (list)
+     :maze maze
+     :direction [0 1]
+     :position (find-start maze)}))
 
 (defn test-input []
   (parse-input ["     |          "
@@ -13,18 +24,34 @@
                 "     |  |  |  D "
                 "     +B-+  +--+ "]))
 
-(defn getv [map [x y]]
-  (get (get map y) x))
+(defn find-direction [{:as state
+                       :keys [direction]}
+                      [x y :as position]]
+  (cond
+    (zero? x) ;; horizontal
+    (if (= (getv (mapv + position [0 1])) ))
 
-(defn neighbours [[x y :as pos]]
-  (map #(mapv + pos %) [[-1 0]
-                        [1 0]
-                        [0 -1]
-                        [0 1]]))
+    (zero? y) ;; vertical
+  )
 
-(defn find-start [map]
-  (let [x (.indexOf (get map 0) \|)]
-    [x 0]))
+(defn step [{:as                   state
+             [x y :as position]    :position
+             [dx dy :as direction] :direction}]
+  (let [new-pos (mapv + position direction)
+        v       (getv state new-pos)]
+    (if (nil? v)
+      nil ;; done - dead end.
+      (->
+       (cond
+         (= v \+)
+         (assoc state :direction (find-direction state new-pos))
+
+         (re-matches #"[A-Z]" (str v))
+         (update state :letters conj v)
+
+         :else
+         state)
+       (assoc :position new-pos)))))
 
 (defn puzzle-input []
   (->> (io/resource "day19-input.txt")
@@ -32,7 +59,4 @@
        (str/split-lines)
        (parse-input)))
 
-(defn solve-1 [input]
-  (let [[x y :as start] (find-start input)]
-    start))
 

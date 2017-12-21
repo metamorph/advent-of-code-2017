@@ -38,8 +38,23 @@
                (join-matrix))
            rules)))
 
-(defn solve-1 [iterations matrix rules]
-  (let [processed (process-matrix iterations matrix rules)
-        on-filter (fn [c] (= c \#))]
-    (count (filter on-filter (flatten processed)))))
+(defn make-rule
+  "Read a spec ('pattern to match' -> 'stuff to replace with')
+  and return a pair of matrices [pattern replacement]."
+  [spec]
+  (let [[_ p r] (re-find #"(.*)\s+=>\s+(.*)" spec)
+        plines (clojure.string/split p #"/")
+        rlines (clojure.string/split r #"/")]
+    [(mapv vec plines) (mapv vec rlines)]))
+
+(defn read-rules
+  "Creates a map of rules (key: pattern, value: replacement)."
+  [lines]
+  (into {} (map make-rule lines)))
+
+
+;; (defn solve-1 [iterations matrix rules]
+;;   (let [processed (process-matrix iterations matrix rules)
+;;         on-filter (fn [c] (= c \#))]
+;;     (count (filter on-filter (flatten processed)))))
 

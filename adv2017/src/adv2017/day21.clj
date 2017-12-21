@@ -49,8 +49,11 @@
 
 (defn read-rules
   "Creates a map of rules (key: pattern, value: replacement)."
-  [lines]
-  (into {} (map make-rule lines)))
+  [lines] (into {} (map make-rule lines)))
+
+(def initial-pattern [(mapv vec ".#.")
+                       (mapv vec "..#")
+                       (mapv vec "###")])
 
 
 ;; (defn solve-1 [iterations matrix rules]
